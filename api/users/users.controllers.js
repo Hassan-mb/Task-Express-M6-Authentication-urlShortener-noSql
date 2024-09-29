@@ -2,20 +2,21 @@ const User = require("../../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { generate } = require("shortid");
+const dotenv = require("dotenv");
 dotenv.config();
 
 const saltRounds = 10;
 
-hashPassword = async (password) => {
+const hashPassword = async (password) => {
   try {
-    const hashedPassword = bcrypt.hash(password, saltRounds);
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
     return hashedPassword;
   } catch (error) {
     console.log("i told aya to do this");
   }
 };
 
-generateToken = async (user) => {
+const generateToken = (user) => {
   const payload = {
     username: user.username,
     _id: user._id,
@@ -33,7 +34,7 @@ exports.signup = async (req, res) => {
     req.body.password = hashify;
     const newUser = await User.create(req.body);
     const token = generateToken(newUser);
-    res.status(201).json({ token: token });
+    return res.status(201).json({ token: token });
   } catch (err) {
     next(err);
   }
@@ -44,7 +45,7 @@ exports.signin = async (req, res) => {
     const token = generateToken(req.user);
     return res.status(201).json({ token: token });
   } catch (err) {
-    res.status(500).json("Server Error");
+    return res.status(500).json("Server Error");
   }
 };
 
